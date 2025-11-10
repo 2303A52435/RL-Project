@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 600px; margin: 40px auto; padding: 20px;
+        }
+        .container {
+            background-color: #f9f9f9; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 20px; margin-bottom: 30px;
+        }
+        h2 { color: #333; }
+        button {
+            font-size: 16px; padding: 10px 15px; color: white;
+            background-color: #007bff; border: none;
+            border-radius: 5px; cursor: pointer;
+        }
+        button:disabled { background-color: #cccccc; }
+        input {
+            font-size: 16px; padding: 8px; border-radius: 5px;
+            border: 1px solid #ccc; width: 95%; margin-bottom: 10px;
+        }
+        #tracker-result-container {
+            margin-top: 25px; padding: 15px; background-color: #fff;
+            border: 1px solid #eee; border-radius: 5px;
+        }
+        .result-item {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .result-item strong {
+            font-size: 24px;
+            color: #007bff;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Attendance Tracker (75% Rule)</h2>
+        
+        <label for="classesHeldInput">Classes Held So Far:</label>
+        <input type="number" id="classesHeldInput" placeholder="e.g., 40">
+        
+        <label for="classesAttendedInput">Classes You Attended:</label>
+        <input type="number" id="classesAttendedInput" placeholder="e.g., 35">
+        
+        <button id="trackBtn">Track</button>
+        
+        <div id="tracker-result-container">
+            <h3>Your Status:</h3>
+            <div id="tracker-report-content">
+                <p>Enter your info above and click track.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // --- Script for Attendance Tracker ---
+            const trackButton = document.getElementById("trackBtn");
+            const classesHeldInput = document.getElementById("classesHeldInput");
+            const classesAttendedInput = document.getElementById("classesAttendedInput");
+            
+            const reportEl = document.getElementById("tracker-report-content");
+
+            trackButton.addEventListener("click", async () => {
+                const classesHeld = classesHeldInput.value;
+                const classesAttended = classesAttendedInput.value;
+
+                if (!classesHeld || !classesAttended) {
+                    reportEl.innerHTML = "<p style='color: red;'>Please fill in all fields.</p>";
+                    return;
+                }
+
+                reportEl.innerHTML = "<p>Calculating...</p>";
+                trackButton.disabled = true;
+
+                try {
+                    // 1. Build the URL with the new endpoint and parameters
+                    const url = `http://127.0.0.1:8000/track_attendance?classes_held=${classesHeld}&classes_attended=${classesAttended}`;
+
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        reportEl.innerHTML = `<p style='color: red;'>${data.detail || "Error in calculation."}</p>`;
+                    } else {
+                        // 2. Display the new 2-line result
+                        reportEl.innerHTML = `
+                            <div class="result-item">
+                                Your Attendance: <strong>${data.attendance_percent}%</strong>
+                            </div>
+                            <div class="result-item">
+                                Required (so far): <strong>${data.required_classes_for_75_so_far} classes</strong>
+                            </div>
+                        `;
+                    }
+
+                } catch (error) {
+                    reportEl.innerHTML = "<p style='color: red;'>Could not connect to the backend.</p>";
+                } finally {
+                    trackButton.disabled = false;
+After I run this uvicorn main:app --reload in terminal 
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+
+And after I run the HTML code in browser and I click the track button it shows Calculating... but not the result
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
