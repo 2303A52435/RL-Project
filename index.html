@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Attendance Tracker</title>
+  <title>Smart Optimizer</title>
 
   <style>
     :root{
@@ -15,38 +15,38 @@
       --danger: #e74c3c;
       --muted: #6b7280;
     }
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;}
+    html,body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;}
     body{
       background: var(--bg1);
-      display:flex;align-items:center;justify-content:center;
       padding:28px;
       color:#0b1220;
     }
-
     .app {
       width: 450px;
       max-width: 98%;
-      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.98));
-      border-radius: 12px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
-      overflow: hidden;
+      margin: 20px auto;
     }
-
     .header{
       padding:20px 28px;
-      background: linear-gradient(90deg, rgba(20,126,251,0.12), rgba(46,204,113,0.06));
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.98));
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
     }
     .title{font-weight:700;font-size:18px;}
     .subtitle{font-size:13px;color:var(--muted);}
 
     .content-area {
       padding: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.98));
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      border-radius: 0 0 12px 12px;
     }
     .card{
       background:var(--card);
       border-radius:10px;
       padding:18px;
       box-shadow: 0 6px 20px rgba(11,17,32,0.05);
+      margin-top: 25px; /* Space between cards */
     }
 
     label{display:block;margin-top:10px;font-size:13px;font-weight:600;color:#1f2937}
@@ -58,8 +58,8 @@
     }
     .btn:active{transform:translateY(1px)}
     .btn.secondary{background:#6b7280; margin-left: 8px;}
+    .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
 
-    /* This is the result box */
     .message{
       margin-top:18px;
       padding:14px;
@@ -68,10 +68,9 @@
     }
     .message strong {
       font-size: 1.1em;
-      display: block; /* Makes the percentage show on its own line */
+      display: block;
       margin-bottom: 5px;
     }
-    
     .message.good{background:#f0fff4;border:1px solid rgba(46,204,113,0.3);color:#0b6f3a}
     .message.bad{background:#fff6f6;border:1px solid rgba(231,76,60,0.3);color:#7a1a16}
     .message.warn{background:#fffaf0;border:1px solid rgba(243,156,18,0.3);color:#7a4b00}
@@ -83,97 +82,137 @@
   <div class="app">
     <div class="header">
       <div>
-        <div class="title">🎓 Attendance Tracker (75% Rule)</div>
-        <div class="subtitle">Calculates your catch-up or buffer</div>
-      </div>
+        <div class="title">🎓 Smart Optimizer Project</div>
+        <div class="subtitle">By Ankam LALA</div> </div>
     </div>
 
     <div class="content-area">
+
       <div class="card">
         <div>
+          <h2>Attendance Tracker</h2>
+          <p style="color:var(--muted); font-size: 14px;">A tool for students to check their status.</p>
+          
           <label for="totalClasses">Classes Held So Far</label>
           <input id="totalClasses" type="number" min="1" placeholder="e.g., 40" />
           
           <label for="attendedClasses">Classes You Attended</label>
           <input id="attendedClasses" type="number" min="0" placeholder="e.g., 35" />
 
-          <button class="btn" onclick="checkAttendance()">Check Status</button>
-          <button class="btn secondary" onclick="clearForm()">Clear</button>
+          <button class="btn" id="trackBtn">Check Status</button>
+          <button class="btn secondary" id="clearBtn">Clear</button>
 
-          <div id="attendanceMessage" style="margin-top:10px"></div>
+          <div id="attendanceMessage"></div>
         </div>
       </div>
+
+      <div class="card">
+        <div>
+          <h2>🤖 Smart AI Optimizer</h2>
+          <p style="color:var(--muted); font-size: 14px;">For admins. Click to run the AI and find the best schedule.</p>
+
+          <button class="btn" id="optimizeBtn">Run AI Optimizer</button>
+
+          <div id="optimizerMessage"></div>
+        </div>
+      </div>
+
     </div>
-    
   </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", () => {
+    
+    // --- SCRIPT FOR CARD 1: Attendance Tracker ---
+    const trackButton = document.getElementById('trackBtn');
+    const clearButton = document.getElementById('clearBtn');
+    const totalClassesInput = document.getElementById('totalClasses');
+    const attendedClassesInput = document.getElementById('attendedClasses');
+    const attendanceMsgEl = document.getElementById('attendanceMessage');
 
-  function checkAttendance(){
-    const totalHeld = Number(document.getElementById('totalClasses').value) || 0;
-    const attended = Number(document.getElementById('attendedClasses').value) || 0;
-    const msgEl = document.getElementById('attendanceMessage');
+    trackButton.addEventListener("click", () => {
+      const totalHeld = Number(totalClassesInput.value) || 0;
+      const attended = Number(attendedClassesInput.value) || 0;
 
-    // --- Validation ---
-    if(totalHeld <= 0 || attended < 0){ 
-      msgEl.innerHTML = '<div class="message bad">Please enter valid numbers.</div>'; 
-      return; 
-    }
-    if(attended > totalHeld){ 
-      msgEl.innerHTML = '<div class="message bad">Attended classes cannot be more than held.</div>'; 
-      return; 
-    }
+      if(totalHeld <= 0 || attended < 0){ 
+        attendanceMsgEl.innerHTML = '<div class="message bad">Please enter valid numbers.</div>'; 
+        return; 
+      }
+      if(attended > totalHeld){ 
+        attendanceMsgEl.innerHTML = '<div class="message bad">Attended classes cannot be more than held.</div>'; 
+        return; 
+      }
 
-    const currentPercent = (attended / totalHeld) * 100;
-    let html = '';
+      const currentPercent = (attended / totalHeld) * 100;
+      let html = '';
 
-    // --- NEW LOGIC ---
+      if (currentPercent < 75) {
+        const classesToCatchUp = Math.ceil((0.75 * totalHeld - attended) / 0.25);
+        html = `
+          <div class="message bad">
+            <strong>Current Attendance: ${currentPercent.toFixed(1)}%</strong>
+            You must attend the next <strong>${classesToCatchUp} classes</strong> in a row to get back on track.
+          </div>`;
+      } else if (currentPercent >= 90) {
+        const classesCanSkip = Math.floor((attended - 0.75 * totalHeld) / 0.75);
+        html = `
+          <div class="message good">
+            <strong>Current Attendance: ${currentPercent.toFixed(1)}%</strong>
+            You can skip the next <strong>${classesCanSkip} classes</strong> and still be above 75%.
+          </div>`;
+      } else {
+        const targetAttended = Math.ceil(totalHeld * 0.75);
+        const bufferClasses = attended - targetAttended;
+        html = `
+          <div class="message warn">
+            <strong>Current Attendance: ${currentPercent.toFixed(1)}%</strong>
+            You are on track. You have a buffer of <strong>${bufferClasses} classes</strong>.
+          </div>`;
+      }
+      attendanceMsgEl.innerHTML = html;
+    });
 
-    if (currentPercent < 75) {
-      // 1. BELOW 75%: Calculate "Catch-up"
-      // (attended + x) / (totalHeld + x) = 0.75
-      const classesToCatchUp = Math.ceil((0.75 * totalHeld - attended) / 0.25);
+    clearButton.addEventListener("click", () => {
+      totalClassesInput.value = '';
+      attendedClassesInput.value = '';
+      attendanceMsgEl.innerHTML = '';
+    });
+
+
+    // --- SCRIPT FOR CARD 2: AI Optimizer ---
+    const optimizeButton = document.getElementById('optimizeBtn');
+    const optimizerMsgEl = document.getElementById('optimizerMessage');
+
+    optimizeButton.addEventListener("click", async () => {
       
-      html = `
-        <div class="message bad">
-          <strong>Current Attendance: ${currentPercent.toFixed(1)}%</strong>
-          You are below 75%. You must attend the next <strong>${classesToCatchUp} classes</strong> in a row to get back on track.
-        </div>`;
+      optimizerMsgEl.innerHTML = '<div class="message warn">Running AI... Please wait...</div>';
+      optimizeButton.disabled = true;
 
-    } else if (currentPercent >= 90) {
-      // 2. ABOVE 90%: Calculate "Skip"
-      // attended / (totalHeld + y) = 0.75
-      const classesCanSkip = Math.floor((attended - 0.75 * totalHeld) / 0.75);
+      try {
+        // This URL *must* match your running server
+        const response = await fetch("http://127.0.0.1:8000/get_optimization");
+        const data = await response.json();
 
-      html = `
-        <div class="message good">
-          <strong>Current Attendance: ${currentPercent.toFixed(1)}%</strong>
-          Great job! You can skip the next <strong>${classesCanSkip} classes</strong> and still be above 75%.
-        </div>`;
-        
-    } else {
-      // 3. SAFE ZONE (75% to 89.9%): Calculate "Buffer"
-      const targetAttended = Math.ceil(totalHeld * 0.75);
-      const bufferClasses = attended - targetAttended;
+        if (data.error) {
+          optimizerMsgEl.innerHTML = `<div class="message bad">Error: ${data.error}</div>`;
+        } else {
+          // Success! Show the recommendations
+          optimizerMsgEl.innerHTML = `
+            <div class="message good">
+              <strong>AI Recommendation:</strong>
+              <p>${data.recommendation_1}</p>
+              <p>${data.recommendation_2}</p>
+            </div>`;
+        }
 
-      html = `
-        <div class="message warn">
-          <strong>Current Attendance: ${currentPercent.toFixed(1)}%</strong>
-          You are on track. You have a safety buffer of <strong>${bufferClasses} classes</strong> above the 75% mark.
-        </div>`;
-    }
-    
-    // ------------------
-    
-    msgEl.innerHTML = html;
-  }
-
-  function clearForm(){
-    document.getElementById('totalClasses').value = '';
-    document.getElementById('attendedClasses').value = '';
-    document.getElementById('attendanceMessage').innerHTML = '';
-  }
-
+      } catch (error) {
+        console.error("Fetch Error:", error);
+        optimizerMsgEl.innerHTML = '<div class="message bad"><strong>Error:</strong> Could not connect to the backend server. Is it running?</div>';
+      } finally {
+        optimizeButton.disabled = false;
+      }
+    });
+});
 </script>
 
 </body>
